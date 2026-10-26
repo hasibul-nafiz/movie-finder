@@ -1,6 +1,6 @@
 import { Pressable, ScrollView, StyleSheet, Text } from "react-native";
 import { genres } from "@/constants/genres";
-import { colors, fontSizes, radius, spacing } from "@/constants/theme";
+import { colors, fontSizes, radius, sizes, spacing } from "@/constants/theme";
 
 type Props = {
   selectedId: number | null;
@@ -46,7 +46,7 @@ const styles = StyleSheet.create({
     gap: spacing.small,
   },
   chip: {
-    minHeight: 44,
+    minHeight: sizes.touchTarget,
     justifyContent: "center",
     paddingHorizontal: spacing.medium,
     borderRadius: radius.large,

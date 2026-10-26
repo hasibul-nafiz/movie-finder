@@ -1,10 +1,20 @@
 import { useEffect, useState } from "react";
-import { Image, Pressable, ScrollView, Share, StyleSheet, Text, View } from "react-native";
+import {
+  Image,
+  Pressable,
+  ScrollView,
+  Share,
+  StyleSheet,
+  Text,
+  useWindowDimensions,
+  View,
+} from "react-native";
 import { useLocalSearchParams } from "expo-router";
+import { SafeAreaView } from "react-native-safe-area-context";
 import StatusView from "@/components/StatusView";
 import { addMovie, isSaved, removeMovie } from "@/db/watchlist";
 import { getMovieDetails, getPosterUrl } from "@/services/tmdb";
-import { colors, fontSizes, radius, spacing } from "@/constants/theme";
+import { colors, fontSizes, radius, sizes, spacing } from "@/constants/theme";
 import { MovieDetails } from "@/types/movie";
 
 function formatRuntime(runtime: number | null) {
@@ -15,6 +25,7 @@ function formatRuntime(runtime: number | null) {
 }
 
 export default function MovieDetailsScreen() {
+  const { width, height } = useWindowDimensions();
   const { id } = useLocalSearchParams<{ id: string }>();
   const [movie, setMovie] = useState<MovieDetails | null>(null);
   const [loading, setLoading] = useState(true);
@@ -34,7 +45,9 @@ export default function MovieDetailsScreen() {
         setMovie(await getMovieDetails(Number(id)));
         setSaved(await isSaved(Number(id)));
       } catch {
-        setError("Could not load this movie. Check your connection and try again.");
+        setError(
+          "Could not load this movie. Check your connection and try again.",
+        );
       } finally {
         setLoading(false);
       }
@@ -80,50 +93,67 @@ export default function MovieDetailsScreen() {
     }
   }
 
+  const posterWidth = width > height ? "30%" : "70%";
   const posterUrl = getPosterUrl(movie.poster_path);
-  const year = movie.release_date ? movie.release_date.slice(0, 4) : "Unknown year";
+  const year = movie.release_date
+    ? movie.release_date.slice(0, 4)
+    : "Unknown year";
 
   return (
-    <ScrollView style={styles.container} contentContainerStyle={styles.content}>
-      {posterUrl ? (
-        <Image source={{ uri: posterUrl }} style={styles.poster} />
-      ) : (
-        <View style={[styles.poster, styles.noPoster]}>
-          <Text style={styles.noPosterText}>{movie.title}</Text>
+    <SafeAreaView style={styles.container} edges={["bottom", "left", "right"]}>
+      <ScrollView contentContainerStyle={styles.content}>
+        {posterUrl ? (
+          <Image
+            source={{ uri: posterUrl }}
+            style={[styles.poster, { width: posterWidth }]}
+          />
+        ) : (
+          <View
+            style={[styles.poster, styles.noPoster, { width: posterWidth }]}
+          >
+            <Text style={styles.noPosterText}>{movie.title}</Text>
+          </View>
+        )}
+        <Text style={styles.title}>{movie.title}</Text>
+        <View style={styles.facts}>
+          <Text style={styles.rating}>★ {movie.vote_average.toFixed(1)}</Text>
+          <Text style={styles.info}>{formatRuntime(movie.runtime)}</Text>
+          <Text style={styles.info}>{year}</Text>
         </View>
-      )}
-      <Text style={styles.title}>{movie.title}</Text>
-      <Text style={styles.info}>
-        {year} · {formatRuntime(movie.runtime)}
-      </Text>
-      <Text style={styles.rating}>★ {movie.vote_average.toFixed(1)}</Text>
-      <View style={styles.genres}>
-        {movie.genres.map((genre) => (
-          <Text key={genre.id} style={styles.genre}>
-            {genre.name}
-          </Text>
-        ))}
-      </View>
-      <View style={styles.buttons}>
-        <Pressable
-          onPress={handleSavePress}
-          style={({ pressed }) => [styles.button, pressed && styles.buttonPressed]}
-        >
-          <Text style={styles.buttonText}>
-            {saved ? "Remove from watchlist" : "Save to watchlist"}
-          </Text>
-        </Pressable>
-        <Pressable
-          onPress={handleSharePress}
-          style={({ pressed }) => [styles.button, pressed && styles.buttonPressed]}
-        >
-          <Text style={styles.buttonText}>Share</Text>
-        </Pressable>
-      </View>
-      <Text style={styles.overview}>
-        {movie.overview || "No overview available."}
-      </Text>
-    </ScrollView>
+        <View style={styles.genres}>
+          {movie.genres.map((genre) => (
+            <Text key={genre.id} style={styles.genre}>
+              {genre.name}
+            </Text>
+          ))}
+        </View>
+        <View style={styles.buttons}>
+          <Pressable
+            onPress={handleSavePress}
+            style={({ pressed }) => [
+              styles.button,
+              pressed && styles.buttonPressed,
+            ]}
+          >
+            <Text style={styles.buttonText}>
+              {saved ? "Remove from watchlist" : "Save to watchlist"}
+            </Text>
+          </Pressable>
+          <Pressable
+            onPress={handleSharePress}
+            style={({ pressed }) => [
+              styles.button,
+              pressed && styles.buttonPressed,
+            ]}
+          >
+            <Text style={styles.buttonText}>Share</Text>
+          </Pressable>
+        </View>
+        <Text style={styles.overview}>
+          {movie.overview || "No overview available."}
+        </Text>
+      </ScrollView>
+    </SafeAreaView>
   );
 }
 
@@ -136,7 +166,6 @@ const styles = StyleSheet.create({
     padding: spacing.medium,
   },
   poster: {
-    width: "60%",
     aspectRatio: 2 / 3,
     alignSelf: "center",
     borderRadius: radius.medium,
@@ -157,20 +186,29 @@ const styles = StyleSheet.create({
     fontSize: fontSizes.title,
     fontWeight: "bold",
     marginTop: spacing.medium,
+    textAlign: "center",
+  },
+  facts: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: spacing.medium,
+    marginTop: spacing.small,
   },
   info: {
     color: colors.mutedText,
     fontSize: fontSizes.medium,
-    marginTop: spacing.small,
   },
   rating: {
     color: colors.accent,
     fontSize: fontSizes.large,
-    marginTop: spacing.small,
+    fontWeight: "bold",
   },
   genres: {
     flexDirection: "row",
     flexWrap: "wrap",
+    justifyContent: "center",
     gap: spacing.small,
     marginTop: spacing.medium,
   },
@@ -189,7 +227,7 @@ const styles = StyleSheet.create({
   },
   button: {
     flex: 1,
-    minHeight: 44,
+    minHeight: sizes.touchTarget,
     alignItems: "center",
     justifyContent: "center",
     paddingHorizontal: spacing.small,
@@ -208,7 +246,7 @@ const styles = StyleSheet.create({
   overview: {
     color: colors.text,
     fontSize: fontSizes.medium,
-    lineHeight: 24,
+    lineHeight: sizes.bodyLineHeight,
     marginTop: spacing.medium,
   },
 });
