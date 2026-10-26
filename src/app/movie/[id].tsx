@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import {
+  ActivityIndicator,
   Image,
   Pressable,
   ScrollView,
@@ -12,6 +13,7 @@ import {
 import { useLocalSearchParams } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 import StatusView from "@/components/StatusView";
+import Toast from "@/components/Toast";
 import { addMovie, isSaved, removeMovie } from "@/db/watchlist";
 import { getMovieDetails, getPosterUrl } from "@/services/tmdb";
 import { colors, fontSizes, radius, sizes, spacing } from "@/constants/theme";
@@ -31,6 +33,8 @@ export default function MovieDetailsScreen() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [saved, setSaved] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [toast, setToast] = useState<string | null>(null);
   const [attempt, setAttempt] = useState(0);
 
   function handleRetry() {
@@ -71,15 +75,23 @@ export default function MovieDetailsScreen() {
   const details = movie;
 
   async function handleSavePress() {
+    if (saving) {
+      return;
+    }
+    setSaving(true);
     try {
       if (saved) {
         await removeMovie(details.id);
+        setToast("Removed from watchlist");
       } else {
         await addMovie(details);
+        setToast("Added to watchlist");
       }
       setSaved(!saved);
     } catch {
       setError("Could not update your watchlist. Please try again.");
+    } finally {
+      setSaving(false);
     }
   }
 
@@ -135,9 +147,13 @@ export default function MovieDetailsScreen() {
               pressed && styles.buttonPressed,
             ]}
           >
-            <Text style={styles.buttonText}>
-              {saved ? "Remove from watchlist" : "Save to watchlist"}
-            </Text>
+            {saving ? (
+              <ActivityIndicator color={colors.background} />
+            ) : (
+              <Text style={styles.buttonText}>
+                {saved ? "Remove from watchlist" : "Save to watchlist"}
+              </Text>
+            )}
           </Pressable>
           <Pressable
             onPress={handleSharePress}
@@ -153,6 +169,7 @@ export default function MovieDetailsScreen() {
           {movie.overview || "No overview available."}
         </Text>
       </ScrollView>
+      <Toast message={toast} onHide={() => setToast(null)} />
     </SafeAreaView>
   );
 }
