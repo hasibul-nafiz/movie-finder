@@ -3,13 +3,32 @@ import { genres } from "@/constants/genres";
 import { colors, fontSizes, radius, sizes, spacing } from "@/constants/theme";
 
 type Props = {
+  popularSelected: boolean;
   selectedId: number | null;
+  onPopularPress: () => void;
   onPress: (id: number) => void;
 };
 
-export default function GenreChips({ selectedId, onPress }: Props) {
+export default function GenreChips({
+  popularSelected,
+  selectedId,
+  onPopularPress,
+  onPress,
+}: Props) {
   return (
     <View style={styles.row}>
+      <Pressable
+        onPress={onPopularPress}
+        style={({ pressed }) => [
+          styles.chip,
+          popularSelected && styles.chipSelected,
+          pressed && styles.chipPressed,
+        ]}
+      >
+        <Text style={[styles.text, popularSelected && styles.textSelected]}>
+          Popular
+        </Text>
+      </Pressable>
       {genres.map((genre) => {
         const selected = genre.id === selectedId;
         return (
