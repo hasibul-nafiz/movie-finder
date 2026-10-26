@@ -2,6 +2,7 @@ import { Movie, MovieDetails } from "@/types/movie";
 
 const BASE_URL = "https://api.themoviedb.org/3";
 const IMAGE_URL = "https://image.tmdb.org/t/p/w500";
+const BACKDROP_URL = "https://image.tmdb.org/t/p/w780";
 
 type MovieList = { results: Movie[] };
 
@@ -43,4 +44,11 @@ export function getPosterUrl(path: string | null): string | null {
     return null;
   }
   return `${IMAGE_URL}${path}`;
+}
+
+export function getBackdropUrl(path: string | null): string | null {
+  if (path === null) {
+    return null;
+  }
+  return `${BACKDROP_URL}${path}`;
 }

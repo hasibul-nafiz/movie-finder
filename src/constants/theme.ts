@@ -32,4 +32,5 @@ export const fontSizes = {
 export const sizes = {
   touchTarget: 44,
   bodyLineHeight: 24,
+  backdropMaxHeight: 220,
 };
