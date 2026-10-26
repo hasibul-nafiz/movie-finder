@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Image, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import { Image, Pressable, ScrollView, Share, StyleSheet, Text, View } from "react-native";
 import { useLocalSearchParams } from "expo-router";
 import StatusView from "@/components/StatusView";
 import { addMovie, isSaved, removeMovie } from "@/db/watchlist";
@@ -70,6 +70,16 @@ export default function MovieDetailsScreen() {
     }
   }
 
+  async function handleSharePress() {
+    try {
+      await Share.share({
+        message: `${details.title} - https://www.themoviedb.org/movie/${details.id}`,
+      });
+    } catch {
+      setError("Could not share this movie. Please try again.");
+    }
+  }
+
   const posterUrl = getPosterUrl(movie.poster_path);
   const year = movie.release_date ? movie.release_date.slice(0, 4) : "Unknown year";
 
@@ -94,14 +104,22 @@ export default function MovieDetailsScreen() {
           </Text>
         ))}
       </View>
-      <Pressable
-        onPress={handleSavePress}
-        style={({ pressed }) => [styles.button, pressed && styles.buttonPressed]}
-      >
-        <Text style={styles.buttonText}>
-          {saved ? "Remove from watchlist" : "Save to watchlist"}
-        </Text>
-      </Pressable>
+      <View style={styles.buttons}>
+        <Pressable
+          onPress={handleSavePress}
+          style={({ pressed }) => [styles.button, pressed && styles.buttonPressed]}
+        >
+          <Text style={styles.buttonText}>
+            {saved ? "Remove from watchlist" : "Save to watchlist"}
+          </Text>
+        </Pressable>
+        <Pressable
+          onPress={handleSharePress}
+          style={({ pressed }) => [styles.button, pressed && styles.buttonPressed]}
+        >
+          <Text style={styles.buttonText}>Share</Text>
+        </Pressable>
+      </View>
       <Text style={styles.overview}>
         {movie.overview || "No overview available."}
       </Text>
@@ -164,11 +182,17 @@ const styles = StyleSheet.create({
     borderRadius: radius.large,
     backgroundColor: colors.card,
   },
+  buttons: {
+    flexDirection: "row",
+    gap: spacing.small,
+    marginTop: spacing.medium,
+  },
   button: {
+    flex: 1,
     minHeight: 44,
     alignItems: "center",
     justifyContent: "center",
-    marginTop: spacing.medium,
+    paddingHorizontal: spacing.small,
     borderRadius: radius.medium,
     backgroundColor: colors.accent,
   },
@@ -179,6 +203,7 @@ const styles = StyleSheet.create({
     color: colors.background,
     fontSize: fontSizes.medium,
     fontWeight: "bold",
+    textAlign: "center",
   },
   overview: {
     color: colors.text,
