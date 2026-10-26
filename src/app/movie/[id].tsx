@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
-import { Image, ScrollView, StyleSheet, Text, View } from "react-native";
+import { Image, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { useLocalSearchParams } from "expo-router";
 import StatusView from "@/components/StatusView";
+import { addMovie, isSaved, removeMovie } from "@/db/watchlist";
 import { getMovieDetails, getPosterUrl } from "@/services/tmdb";
 import { colors, fontSizes, radius, spacing } from "@/constants/theme";
 import { MovieDetails } from "@/types/movie";
@@ -18,6 +19,7 @@ export default function MovieDetailsScreen() {
   const [movie, setMovie] = useState<MovieDetails | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [saved, setSaved] = useState(false);
   const [attempt, setAttempt] = useState(0);
 
   function handleRetry() {
@@ -30,6 +32,7 @@ export default function MovieDetailsScreen() {
     async function loadMovie() {
       try {
         setMovie(await getMovieDetails(Number(id)));
+        setSaved(await isSaved(Number(id)));
       } catch {
         setError("Could not load this movie. Check your connection and try again.");
       } finally {
@@ -50,6 +53,21 @@ export default function MovieDetailsScreen() {
         />
       </View>
     );
+  }
+
+  const details = movie;
+
+  async function handleSavePress() {
+    try {
+      if (saved) {
+        await removeMovie(details.id);
+      } else {
+        await addMovie(details);
+      }
+      setSaved(!saved);
+    } catch {
+      setError("Could not update your watchlist. Please try again.");
+    }
   }
 
   const posterUrl = getPosterUrl(movie.poster_path);
@@ -76,6 +94,14 @@ export default function MovieDetailsScreen() {
           </Text>
         ))}
       </View>
+      <Pressable
+        onPress={handleSavePress}
+        style={({ pressed }) => [styles.button, pressed && styles.buttonPressed]}
+      >
+        <Text style={styles.buttonText}>
+          {saved ? "Remove from watchlist" : "Save to watchlist"}
+        </Text>
+      </Pressable>
       <Text style={styles.overview}>
         {movie.overview || "No overview available."}
       </Text>
@@ -137,6 +163,22 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.medium,
     borderRadius: radius.large,
     backgroundColor: colors.card,
+  },
+  button: {
+    minHeight: 44,
+    alignItems: "center",
+    justifyContent: "center",
+    marginTop: spacing.medium,
+    borderRadius: radius.medium,
+    backgroundColor: colors.accent,
+  },
+  buttonPressed: {
+    backgroundColor: colors.accentPressed,
+  },
+  buttonText: {
+    color: colors.background,
+    fontSize: fontSizes.medium,
+    fontWeight: "bold",
   },
   overview: {
     color: colors.text,
