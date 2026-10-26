@@ -1,10 +1,11 @@
 import { useState } from "react";
 import { Pressable, StyleSheet, Text, TextInput, View } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import GenreChips from "@/components/GenreChips";
 import MovieGrid from "@/components/MovieGrid";
 import StatusView from "@/components/StatusView";
 import { getMoviesByGenre, searchMovies } from "@/services/tmdb";
-import { colors, fontSizes, radius, spacing } from "@/constants/theme";
+import { colors, fontSizes, radius, sizes, spacing } from "@/constants/theme";
 import { Movie } from "@/types/movie";
 
 export default function SearchScreen() {
@@ -70,7 +71,8 @@ export default function SearchScreen() {
   }
 
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.container} edges={["top", "left", "right"]}>
+      <Text style={styles.heading}>Search</Text>
       <View style={styles.searchBox}>
         <TextInput
           value={text}
@@ -82,7 +84,10 @@ export default function SearchScreen() {
           style={styles.input}
         />
         {text !== "" && (
-          <Pressable onPress={handleClearPress} style={styles.clearButton}>
+          <Pressable
+            onPress={handleClearPress}
+            style={({ pressed }) => [styles.clearButton, pressed && styles.clearPressed]}
+          >
             <Text style={styles.clearText}>X</Text>
           </Pressable>
         )}
@@ -100,7 +105,7 @@ export default function SearchScreen() {
       ) : (
         <MovieGrid movies={movies} />
       )}
-    </View>
+    </SafeAreaView>
   );
 }
 
@@ -108,6 +113,13 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: colors.background,
+  },
+  heading: {
+    color: colors.text,
+    fontSize: fontSizes.title,
+    fontWeight: "bold",
+    paddingHorizontal: spacing.medium,
+    paddingTop: spacing.medium,
   },
   searchBox: {
     flexDirection: "row",
@@ -118,16 +130,19 @@ const styles = StyleSheet.create({
   },
   input: {
     flex: 1,
-    minHeight: 44,
+    minHeight: sizes.touchTarget,
     paddingHorizontal: spacing.medium,
     color: colors.text,
     fontSize: fontSizes.medium,
   },
   clearButton: {
-    width: 44,
-    height: 44,
+    width: sizes.touchTarget,
+    height: sizes.touchTarget,
     alignItems: "center",
     justifyContent: "center",
+  },
+  clearPressed: {
+    opacity: 0.5,
   },
   clearText: {
     color: colors.mutedText,

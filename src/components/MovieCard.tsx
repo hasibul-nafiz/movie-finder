@@ -65,6 +65,6 @@ const styles = StyleSheet.create({
   rating: {
     color: colors.accent,
     fontSize: fontSizes.small,
-    marginTop: 2,
+    marginTop: spacing.tiny,
   },
 });

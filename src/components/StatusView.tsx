@@ -1,5 +1,5 @@
 import { ActivityIndicator, Pressable, StyleSheet, Text, View } from "react-native";
-import { colors, fontSizes, radius, spacing } from "@/constants/theme";
+import { colors, fontSizes, radius, sizes, spacing } from "@/constants/theme";
 
 type Props = {
   loading: boolean;
@@ -57,8 +57,8 @@ const styles = StyleSheet.create({
     marginBottom: spacing.medium,
   },
   button: {
-    minHeight: 44,
-    minWidth: 120,
+    minHeight: sizes.touchTarget,
+    minWidth: sizes.touchTarget * 3,
     alignItems: "center",
     justifyContent: "center",
     paddingHorizontal: spacing.large,
