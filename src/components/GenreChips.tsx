@@ -1,4 +1,4 @@
-import { Pressable, ScrollView, StyleSheet, Text } from "react-native";
+import { Pressable, StyleSheet, Text, View } from "react-native";
 import { genres } from "@/constants/genres";
 import { colors, fontSizes, radius, sizes, spacing } from "@/constants/theme";
 
@@ -9,12 +9,7 @@ type Props = {
 
 export default function GenreChips({ selectedId, onPress }: Props) {
   return (
-    <ScrollView
-      horizontal
-      showsHorizontalScrollIndicator={false}
-      style={styles.row}
-      contentContainerStyle={styles.content}
-    >
+    <View style={styles.row}>
       {genres.map((genre) => {
         const selected = genre.id === selectedId;
         return (
@@ -33,17 +28,16 @@ export default function GenreChips({ selectedId, onPress }: Props) {
           </Pressable>
         );
       })}
-    </ScrollView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
   row: {
-    flexGrow: 0,
-  },
-  content: {
-    paddingHorizontal: spacing.medium,
+    flexDirection: "row",
+    flexWrap: "wrap",
     gap: spacing.small,
+    paddingHorizontal: spacing.medium,
   },
   chip: {
     minHeight: sizes.touchTarget,

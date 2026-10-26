@@ -1,6 +1,7 @@
 export const colors = {
   background: "#121212",
   card: "#1E1E1E",
+  toast: "#2C2C2C",
   accent: "#FF8A1F",
   accentPressed: "#E07410",
   text: "#FFFFFF",
